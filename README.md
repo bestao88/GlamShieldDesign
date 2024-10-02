@@ -17,6 +17,7 @@
 
 - iOS and Android: MVVM aggregated platform development
 - Shared business logic: Consider using Kotlin Multiplatform
+- Multilanguage support, English as default 
 
 ### 2.2. Backend Architecture
 
@@ -35,7 +36,8 @@
 
 
 ## 3 Data Models 
-(All tables need to add logical deletion field bool, creator and last modifier UUID, creation and last modification time Timestamp)
+  - All tables need to add logical deletion field bool, creator and last modifier user-id, creation and last modification time Timestamp
+  - Field type as UUID for Postgresql, auto-increased integer for mysql 
 
 ### 3.1 User Group Table (UserGroup)
 
@@ -54,11 +56,33 @@
 
 - OrgID: UUID
 - OrgParentID: UUID (FK: organization)
+- CompanyID: UUID (FK: organization)
 - OrgName: String
+- OrgRegDate: Datetime
+- OrgRegYype: UUID (FK: RegType)
+- orgExpireDate: Datetime
 - OrgAddress: String
 - location: GeoJSON Point
 - OrgAdmin: UUID (FK: User)
+- OrgLogo: URL
 - OrgComments: String
+
+#### 3.3.1 Organization Bill (organizationBill)
+- obId: UUID
+- OrgID: UUID (FK: Organization)
+- ob_uid: UUID (FK: User)
+- ob_date: datetime
+- ob_bill_no: String
+- ob_type: UUID (FK: BillType)
+- ob_inout: integer (1 / -1)
+- ob_name: String
+- ob_price: currency
+- ob_quan: decimal
+- ob_rev: currency
+- ob_comments: string
+- ob_auth_uid: UUID (FK: User)
+- ob_auth_date: datetime
+- ob_auth_Comments: string
 
 ### 3.4 User (User)
 
@@ -71,6 +95,7 @@
 - Title: String
 - Department: String
 - Mobile: String
+- uPhoto: URL
 
 ### 3.5 Group Access Table (GroupAccess)
 
@@ -85,6 +110,18 @@
 - repname: String
 - repmap: String (path save for picture)
 - uid: UUID (FK: User)
+
+#### 3.6.1 Monitoring Area routing schedule (RoutingSchedule)
+ - rsid: UUID
+ - created_uid: UUID (FK: user)
+ - rs_start: datetime
+ - rs_end: datetime
+ - repid: UUID (FK: Repository)
+ - routing_uid1: UUID (FK: user)
+ - routing_uid2: UUID (FK: user)
+ - routing_uid3: UUID (FK: user)
+ - routing_uid4: UUID (FK: user)
+ - rs_comments: String
 
 ### 3.7 Trap Type (TrapType)
 
@@ -137,13 +174,17 @@
 
 ### 3.12 Inspection Definition Main Table (routing)
 
-- rtid: UUID
-- uid: UUID (FK: users)
-- rtfromdate: date
-- rtenddate: date
-- rtcomments: String
-- rtid: UUID (FK: users)
-
+  - rtid: UUID
+  - uid: UUID (FK: users)
+  - repid: UUID (FK: Repository)
+  - rtfromdate: date
+  - rtenddate: date
+  - rtcomments: String
+  - routing_uid1: UUID (FK: user)
+  - routing_uid2: UUID (FK: user)
+  - routing_uid3: UUID (FK: user)
+  - routing_uid4: UUID (FK: user)
+    
 ### 3.13 Inspection Definition Sub-table (routingreg)
 
 - Rtrid: UUID
@@ -202,8 +243,6 @@
 - Image_Discription: String
 - created_at: Timestamp
 - updated_at: Timestamp
-
-
 
 ## 4 API Endpoints
 
@@ -275,11 +314,9 @@
 
 - Register organization when user selects organization during registration
 - Allow users to set up hierarchical management of organizations (tree display)
-- First-time registration administrator defaults to current registrant
+- First-time registration administrator defaults to current registrant, only organization name & Email must be entered, others infomation can be updated lately
 - Organization registration allows administrator to change all information
 - Summary and detailed query of historical inspection/pest records for each organization
-
-
 
 ### 6.2 User Registration Module
 
@@ -287,7 +324,9 @@
 - Use Keychain (iOS) and EncryptedSharedPreferences (Android) to store sensitive information
 - Implement auto-login functionality
 - New registered users who enter an existing organization code must be reviewed and granted permissions by the administrator before use
+- Must be entered user name, Email and organization while first-time register
 - Summary and detailed query of historical inspection, inspection, and pest discovery records for each user
+- Organizaiton adminstrator can reset members password
 
 ### 6.3 Organization User Permission Management
 
@@ -295,6 +334,7 @@
 - Custom permission groups can be defined for easy use by users with the same type of permissions
 - Specific permissions can be modified arbitrarily, and can also be modified individually after inheriting from a group
 - Users can be activated and deactivated, but not deleted
+- each user just can be allowed to visit it's company data, 100% avoid cross read another company data (share date only included bugs without other company marked)
 
 ### 6.4 Trap Management:
 
