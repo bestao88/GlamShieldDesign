@@ -39,25 +39,26 @@
 
 ### 3.1 User Group Table (UserGroup)
 
-- ugid: UUID
+- ugid: auto-increase
 - ugname: String
 - ugdiscription: String
 
 ### 3.2 Access Rights Table (AccessRight)
 
-- arid: UUID
+- arid: Auto-Increase
 - arname: String
 - arpage: String
 - arfunction: String
+- argroupid: Integer (FK: accessrightgroup)
 
 ### 3.3 Enterprise and Organization (organization)
 
-- OrgID: UUID
-- OrgParentID: UUID (FK: organization)
+- OrgID: Auto-Increase
+- OrgParentID: Integer (FK: organization)
 - OrgName: String
 - OrgAddress: String
 - location: GeoJSON Point
-- OrgAdmin: UUID (FK: User)
+- OrgAdmin: Integer (FK: User)
 - OrgComments: String
 
 ### 3.4 User (User)
